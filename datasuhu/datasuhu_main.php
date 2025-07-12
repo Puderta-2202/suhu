@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Data Suhu Lingkungan">
-    <meta name="author" content="Your Name/Organization">
+    <meta name="author" content="Puderta">
     <link rel="icon" href="../favicon.ico">
     <title>Data Suhu - Sistem Monitoring Suhu</title>
 
