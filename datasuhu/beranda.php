@@ -111,25 +111,38 @@
         $bgPrediksiClass = "bg-info text-white"; // Latar belakang biru untuk info
     }
 
-    // Ambil data untuk statistik atau rata-rata hari ini
-    $suhuRata2HariIni = "N/A";
-    $suhuMinimalHariIni = "N/A";
-    $suhuMaksimalHariIni = "N/A";
+    // --- LOGIKA PHP UNTUK STATISTIK KESELURUHAN DARI DATABASE ---
+    $suhuRata2Global = "N/A"; // Mengubah nama variabel dari 'HariIni' menjadi 'Global'
+    $suhuMinimalGlobal = "N/A";
+    $suhuMaksimalGlobal = "N/A";
 
-    $sql_statistik = "SELECT 
-                        AVG(CAST(nilai_temperatur AS DECIMAL(5,2))) AS avg_harian,
-                        MIN(CAST(nilai_temperatur AS DECIMAL(5,2))) AS min_harian,
-                        MAX(CAST(nilai_temperatur AS DECIMAL(5,2))) AS max_harian
-                      FROM tbl_temperatur 
-                      WHERE DATE(tanggal) = CURDATE()";
-    $result_statistik = $conn->query($sql_statistik);
-    if ($result_statistik && $result_statistik->num_rows > 0) {
-        $stats = $result_statistik->fetch_assoc();
-        if ($stats['avg_harian'] !== null) {
-            $suhuRata2HariIni = number_format($stats['avg_harian'], 2) . "°C";
-            $suhuMinimalHariIni = number_format($stats['min_harian'], 2) . "°C";
-            $suhuMaksimalHariIni = number_format($stats['max_harian'], 2) . "°C";
+    // Perbaikan query SQL untuk statistik: Hapus klausa WHERE DATE(tanggal) = CURDATE()
+    $sql_statistik_global = "SELECT 
+                                AVG(CAST(nilai_temperatur AS DECIMAL(5,2))) AS avg_total,
+                                MIN(CAST(nilai_temperatur AS DECIMAL(5,2))) AS min_total,
+                                MAX(CAST(nilai_temperatur AS DECIMAL(5,2))) AS max_total
+                             FROM tbl_temperatur";
+    $result_statistik_global = $conn->query($sql_statistik_global);
+
+    if ($result_statistik_global) { // Pastikan query tidak error
+        $stats_global = $result_statistik_global->fetch_assoc();
+        // Pastikan nilai agregat tidak NULL (jika tidak ada data sama sekali, AVG/MIN/MAX akan NULL)
+        if ($stats_global['avg_total'] !== null) {
+            $suhuRata2Global = number_format($stats_global['avg_total'], 2) . "°C";
+            $suhuMinimalGlobal = number_format($stats_global['min_total'], 2) . "°C";
+            $suhuMaksimalGlobal = number_format($stats_global['max_total'], 2) . "°C";
+        } else {
+            // Jika query berhasil tapi tidak ada data sama sekali
+            $suhuRata2Global = "Tidak Ada Data";
+            $suhuMinimalGlobal = "Tidak Ada Data";
+            $suhuMaksimalGlobal = "Tidak Ada Data";
         }
+    } else {
+        // Jika query statistik gagal
+        error_log("SQL Error for global statistics: " . $conn->error);
+        $suhuRata2Global = "Error DB";
+        $suhuMinimalGlobal = "Error DB";
+        $suhuMaksimalGlobal = "Error DB";
     }
 
     $conn->close();
@@ -168,19 +181,19 @@
             <div class="col-md-4">
                 <div class="card shadow-sm equal-height-card">
                     <div class="card-body">
-                        <h5 class="card-title text-muted mb-3">Statistik Hari Ini</h5>
+                        <h5 class="card-title text-muted mb-3">Statistik Keseluruhan Data</h5>
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Rata-rata Harian
-                                <span class="fw-bold text-primary"><?php echo $suhuRata2HariIni; ?></span>
+                                Rata-rata Total
+                                <span class="fw-bold text-primary"><?php echo $suhuRata2Global; ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Suhu Minimal
-                                <span class="fw-bold text-success"><?php echo $suhuMinimalHariIni; ?></span>
+                                Suhu Minimal Total
+                                <span class="fw-bold text-success"><?php echo $suhuMinimalGlobal; ?></span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Suhu Maksimal
-                                <span class="fw-bold text-danger"><?php echo $suhuMaksimalHariIni; ?></span>
+                                Suhu Maksimal Total
+                                <span class="fw-bold text-danger"><?php echo $suhuMaksimalGlobal; ?></span>
                             </li>
                         </ul>
                     </div>
@@ -190,11 +203,11 @@
 
         <div class="card shadow-sm mb-4">
             <div class="card-body">
-                <h5 class="card-title text-primary">Grafik Suhu UMA per Tanggal 12 Juli 2025</h5>
-                <p class="card-text text-muted">Grafik Suhu Rata-rata per Jam.</p>
+                <h5 class="card-title text-primary">Grafik Suhu Harian</h5>
+                <p class="card-text text-muted">Perubahan suhu lingkungan secara keseluruhan.</p>
                 <div class="chart-container" style="position: relative; height:350px; width:100%;">
                     <canvas id="dashboardSuhuChart"></canvas>
-                    <p id="noDataChartMessage" class="text-center text-muted mt-3" style="display: none;">Tidak ada data grafik tersedia untuk 24 jam terakhir.</p>
+                    <p id="noDataChartMessage" class="text-center text-muted mt-3" style="display: none;">Tidak ada data grafik tersedia.</p>
                 </div>
             </div>
         </div>
@@ -271,6 +284,14 @@
                                 }
                             },
                             plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Grafik Semua Data Suhu Rata-rata per Jam',
+                                    font: {
+                                        size: 18,
+                                        weight: 'bold'
+                                    }
+                                },
                                 legend: {
                                     display: true,
                                     position: 'top'
