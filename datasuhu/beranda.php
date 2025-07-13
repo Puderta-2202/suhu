@@ -190,8 +190,8 @@
 
         <div class="card shadow-sm mb-4">
             <div class="card-body">
-                <h5 class="card-title text-primary">Grafik Suhu Harian</h5>
-                <p class="card-text text-muted">Perubahan suhu lingkungan dalam 24 jam terakhir.</p>
+                <h5 class="card-title text-primary">Grafik Suhu UMA per Tanggal 12 Juli 2025</h5>
+                <p class="card-text text-muted">Grafik Suhu Rata-rata per Jam.</p>
                 <div class="chart-container" style="position: relative; height:350px; width:100%;">
                     <canvas id="dashboardSuhuChart"></canvas>
                     <p id="noDataChartMessage" class="text-center text-muted mt-3" style="display: none;">Tidak ada data grafik tersedia untuk 24 jam terakhir.</p>

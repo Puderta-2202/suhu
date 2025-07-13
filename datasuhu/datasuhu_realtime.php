@@ -18,7 +18,6 @@
 <body>
     <?php
     include '../navbar.php';
-
     ?>
 
     <div style="padding-top: 70px;"></div>
@@ -26,11 +25,10 @@
         <div class="card shadow-sm">
             <div class="card-body">
                 <h2 class="card-title text-primary">Grafik Suhu Rata-rata per Jam</h2>
-                <p class="card-text">Visualisasi Suhu Lingkungan UMA selama 24 Jam Terakhir</p>
-
+                <p class="card-text">Visualisasi Semua Data Suhu Lingkungan UMA per Jam.</p>
                 <div class="chart-container mt-4" style="position: relative; height:40vh; max-width: 800px; margin: auto;">
                     <canvas id="myTemperatureChart"></canvas>
-                    <p id="noDataMessage" class="text-center text-muted mt-3" style="display: none;">Tidak ada data grafik tersedia untuk 24 jam terakhir.</p>
+                    <p id="noDataMessage" class="text-center text-muted mt-3" style="display: none;">Tidak ada data grafik tersedia.</p>
                 </div>
             </div>
         </div>
@@ -48,7 +46,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             fetch('get_chart.php')
                 .then(response => {
-                    // Cek apakah respons OK dan Content-Type adalah JSON
                     if (!response.ok) {
                         throw new Error('Network response was not ok: ' + response.status + ' ' + response.statusText);
                     }
@@ -56,32 +53,30 @@
                     if (contentType && contentType.indexOf("application/json") !== -1) {
                         return response.json();
                     } else {
-                        // Jika bukan JSON, mungkin ada error PHP tersembunyi
-                        console.error("Received non-JSON response from get_chart_data.php. Check for PHP errors.");
+                        console.error("Received non-JSON response from get_chart.php. Check for PHP errors.");
                         return response.text().then(text => {
                             throw new Error("Server response was not JSON: " + text);
                         });
                     }
                 })
                 .then(data => {
-                    console.log("Data fetched for chart:", data); // Log data yang diterima
+                    console.log("Data fetched for chart:", data);
 
                     const noDataMessage = document.getElementById('noDataMessage');
                     const chartCanvas = document.getElementById('myTemperatureChart');
 
-                    // Jika tidak ada data atau data kosong
                     if (!Array.isArray(data) || data.length === 0) {
-                        noDataMessage.style.display = 'block'; // Tampilkan pesan tidak ada data
-                        chartCanvas.style.display = 'none'; // Sembunyikan canvas grafik
+                        noDataMessage.style.display = 'block';
+                        chartCanvas.style.display = 'none';
                         console.warn("No data or invalid data format received for chart. Displaying no data message.");
-                        return; // Hentikan proses Chart.js
+                        return;
                     } else {
-                        noDataMessage.style.display = 'none'; // Sembunyikan pesan jika ada data
-                        chartCanvas.style.display = 'block'; // Pastikan canvas terlihat
+                        noDataMessage.style.display = 'none';
+                        chartCanvas.style.display = 'block';
                     }
 
-                    const labels = data.map(row => row.tanggal); // Menggunakan 'tanggal' dari JSON
-                    const temperatures = data.map(row => parseFloat(row.avg_temperatur)); // Menggunakan 'avg_temperatur'
+                    const labels = data.map(row => row.tanggal); // 'tanggal' akan berisi 'YYYY-MM-DD HH:00'
+                    const temperatures = data.map(row => parseFloat(row.avg_temperatur));
 
                     console.log("Chart labels:", labels);
                     console.log("Chart temperatures:", temperatures);
@@ -89,25 +84,25 @@
                     const ctx = chartCanvas.getContext('2d');
 
                     new Chart(ctx, {
-                        type: 'line', // Line chart lebih cocok untuk data time-series
+                        type: 'line',
                         data: {
                             labels: labels,
                             datasets: [{
                                 label: 'Suhu Rata-rata (°C)',
                                 data: temperatures,
-                                backgroundColor: 'rgba(75, 192, 192, 0.2)', // Area di bawah garis
-                                borderColor: 'rgba(75, 192, 192, 1)', // Garis grafik
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
                                 borderWidth: 2,
-                                fill: true, // Isi area di bawah garis
-                                tension: 0.4 // Membuat garis sedikit melengkung
+                                fill: true,
+                                tension: 0.4
                             }]
                         },
                         options: {
                             responsive: true,
-                            maintainAspectRatio: false, // Penting untuk kontrol tinggi/lebar di container
+                            maintainAspectRatio: false,
                             scales: {
                                 y: {
-                                    beginAtZero: false, // Biarkan Chart.js menentukan skala y yang optimal
+                                    beginAtZero: false,
                                     title: {
                                         display: true,
                                         text: 'Suhu (°C)',
@@ -129,7 +124,7 @@
                             plugins: {
                                 title: {
                                     display: true,
-                                    text: 'Data Suhu Rata-rata per Jam (24 Jam Terakhir)',
+                                    text: 'Grafik Semua Data Suhu Rata-rata per Jam', // TEKS BERUBAH DI SINI
                                     font: {
                                         size: 18,
                                         weight: 'bold'
@@ -150,9 +145,9 @@
                 })
                 .catch(error => {
                     console.error('Error fetching or parsing data for chart:', error);
-                    document.getElementById('noDataMessage').style.display = 'block'; // Tampilkan pesan error
-                    document.getElementById('myTemperatureChart').style.display = 'none'; // Sembunyikan canvas
-                    document.getElementById('noDataMessage').innerText = 'Gagal memuat grafik: ' + error.message; // Tampilkan detail error
+                    document.getElementById('noDataMessage').style.display = 'block';
+                    document.getElementById('myTemperatureChart').style.display = 'none';
+                    document.getElementById('noDataMessage').innerText = 'Gagal memuat grafik: ' + error.message;
                 });
         });
     </script>
