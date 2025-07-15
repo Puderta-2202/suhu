@@ -10,7 +10,7 @@ def categorize_temperature(temp):
     temp = float(temp)
     if temp >= 22 and temp <= 25:
         return 'Sangat Nyaman'
-    elif (temp >= 20 and temp < 22) or (temp > 25 and temp <= 28):
+    elif (temp >= 20 and temp < 22) or (temp > 30 and temp <= 33):
         return 'Kurang Nyaman'
     else:
         return 'Tidak Nyaman'
