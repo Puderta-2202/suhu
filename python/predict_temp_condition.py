@@ -15,9 +15,6 @@ def categorize_temperature(temp):
     else:
         return 'Tidak Nyaman'
 
-# --- Path ke model dan encoders yang sudah disimpan ---
-# Model berada di D:\laragon\www\suhu\models\
-# Karena skrip ini ada di 'python/', perlu naik satu level ('..') untuk mencapai 'models/'
 MODEL_DIR = '../models/' 
 MODEL_PATH = os.path.join(MODEL_DIR, 'naive_bayes_model.pkl')
 LABEL_ENCODER_PATH = os.path.join(MODEL_DIR, 'label_encoder.pkl')
